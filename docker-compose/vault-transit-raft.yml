@@ -1,0 +1,87 @@
+services:
+  vault-transit-engine:
+    container_name: vault-transit-engine
+    image: vault-poc
+    volumes:
+      - ./vault-transit-raft/vault-transit-engine/vault.hcl:/vault/config/vault.hcl
+      - ./vault-transit-raft/vault-transit-engine/data/vault:/vault/vault
+      - ./vault-transit-raft/vault-transit-engine/data/output:/vault/output
+      - ./vault-transit-raft/entrypoint/transit.sh:/vault/entrypoint/transit.sh
+    ports:
+      - "8200:8200"
+    networks:
+      - "vault-transit-raft"
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+    entrypoint: ["/vault/entrypoint/transit.sh"]
+
+  vault-raft-server-1:
+    container_name: vault-raft-server-1
+    image: vault-poc
+    depends_on:
+      - vault-transit-engine
+    volumes:
+      - ./vault-transit-raft/vault-1/vault.hcl:/vault/config/vault.hcl
+      - ./vault-transit-raft/vault-1/data/vault:/vault/vault
+      - ./vault-transit-raft/vault-transit-engine/data/output:/vault/external/transit-engine:ro
+      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+    ports:
+      - "8210:8200"
+      - "8211:8201"
+    networks:
+      - "vault-transit-raft"
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+      VAULT_SERVER_NUM: 1
+      VAULT_TRANSIT_SERVER: vault-transit-engine:8200
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
+    entrypoint: ["/vault/entrypoint/cluster.sh"]
+
+  vault-raft-server-2:
+    container_name: vault-raft-server-2
+    image: vault-poc
+    depends_on:
+      - vault-transit-engine
+      - vault-raft-server-1
+    volumes:
+      - ./vault-transit-raft/vault-2/vault.hcl:/vault/config/vault.hcl
+      - ./vault-transit-raft/vault-2/data/vault:/vault/vault
+      - ./vault-transit-raft/vault-transit-engine/data/output:/vault/external/transit-engine:ro
+      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+    ports:
+      - "8220:8200"
+      - "8221:8201"
+    networks:
+      - "vault-transit-raft"
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+      VAULT_SERVER_NUM: 2
+      VAULT_TRANSIT_SERVER: vault-transit-engine:8200
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
+    entrypoint: ["/vault/entrypoint/cluster.sh"]
+
+  vault-raft-server-3:
+    container_name: vault-raft-server-3
+    image: vault-poc
+    depends_on:
+      - vault-transit-engine
+      - vault-raft-server-2
+    volumes:
+      - ./vault-transit-raft/vault-3/vault.hcl:/vault/config/vault.hcl
+      - ./vault-transit-raft/vault-3/data/vault:/vault/vault
+      - ./vault-transit-raft/vault-transit-engine/data/output:/vault/external/transit-engine:ro
+      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+    ports:
+      - "8230:8200"
+      - "8231:8201"
+    networks:
+      - "vault-transit-raft"
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+      VAULT_SERVER_NUM: 3
+      VAULT_TRANSIT_SERVER: vault-transit-engine:8200
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
+    entrypoint: ["/vault/entrypoint/cluster.sh"]
+
+networks:
+  vault-transit-raft:

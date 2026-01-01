@@ -1,0 +1,31 @@
+# Vault data and storage
+data
+*.db
+*.sqlite
+
+# Vault configuration with sensitive data
+# vault.hcl
+*.key
+*.pem
+*.crt
+*.csr
+
+# Vault tokens and credentials
+.vault-token
+root_token
+unseal_keys
+recovery_keys
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
