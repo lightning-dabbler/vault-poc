@@ -8,3 +8,9 @@ build: # build vault-poc docker image (args=?)
 
 build-no-cache: # build vault-poc docker image ([no cache] args=?)
 	docker build -f Dockerfile -t vault-poc --no-cache $(args) .
+
+pre-commit: # Run pre-commit validations on all files
+	pre-commit run --all-files
+
+init-pre-commit: # Initialize pre-commit
+	pre-commit install
