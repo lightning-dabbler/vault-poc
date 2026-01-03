@@ -1,4 +1,18 @@
 services:
+  haproxy:
+    image: haproxy:3.1.12-alpine
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./vault-transit-raft/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - vault-transit-raft
+    depends_on:
+      - vault-transit-engine
+      - vault-raft-server-1
+      - vault-raft-server-2
+      - vault-raft-server-3
+
   vault-transit-engine:
     container_name: vault-transit-engine
     image: vault-poc
@@ -10,7 +24,7 @@ services:
     ports:
       - "8200:8200"
     networks:
-      - "vault-transit-raft"
+      - vault-transit-raft
     environment:
       VAULT_ADDR: http://0.0.0.0:8200
     entrypoint: ["/vault/entrypoint/transit.sh"]
@@ -29,7 +43,7 @@ services:
       - "8210:8200"
       - "8211:8201"
     networks:
-      - "vault-transit-raft"
+      - vault-transit-raft
     environment:
       VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 1
@@ -52,7 +66,7 @@ services:
       - "8220:8200"
       - "8221:8201"
     networks:
-      - "vault-transit-raft"
+      - vault-transit-raft
     environment:
       VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 2
@@ -75,7 +89,7 @@ services:
       - "8230:8200"
       - "8231:8201"
     networks:
-      - "vault-transit-raft"
+      - vault-transit-raft
     environment:
       VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 3
