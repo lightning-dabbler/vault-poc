@@ -1,0 +1,50 @@
+# https://docs.astral.sh/ruff/configuration/
+
+include = [
+  "pyproject.toml",
+  "**/*.py"
+]
+force-exclude = true
+# src = ["src"]
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".ipynb_checkpoints",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "site-packages",
+  "venv"
+]
+line-length = 120
+
+# https://docs.astral.sh/ruff/rules/
+[lint]
+select = ["B", "C", "E", "F", "W", "T", "B9"]
+ignore = ["E203", "E501", "C408"]
+extend-select = ["I"]
+
+[lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 5.
+max-complexity = 15
+
+[lint.per-file-ignores]
+"__init__.py" = ["E402"]

@@ -13,3 +13,22 @@ repos:
     -   id: check-merge-conflict
     -   id: pretty-format-json
         args: [--autofix]
+-   repo: https://github.com/pappasam/toml-sort
+    rev: v0.24.2
+    hooks:
+    -   id: toml-sort
+        args: [--in-place]
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+    -   id: ruff
+        name: Ruff lint
+        pass_filenames: false # There's a bug where pre-commit ruff doesn't utilize some linting rules (e.g. known-first-party, per-file-ignores, etc.) -- workaround https://github.com/astral-sh/ruff-pre-commit/issues/54#issuecomment-1916561394
+        alias: ruff-lint
+        args: ["--config", "ruff.toml", "--fix","-v"]
+    -   id: ruff-format
+        name: Ruff format
+        pass_filenames: false # There's a bug where pre-commit ruff doesn't utilize some linting rules (e.g. known-first-party, per-file-ignores, etc.) -- workaround https://github.com/astral-sh/ruff-pre-commit/issues/54#issuecomment-1916561394
+        alias: ruff-format
+        args: [--config=ruff.toml,"-v"]

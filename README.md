@@ -1,16 +1,7 @@
 # vault-poc
 
-## Resources
-*vault transit secret engine*
-- 1 node
-- Stores no data
-- Acts as a cryptography engine for the vault secrets cluster
-- Used to auto unseal vault server nodes
-
-*vault secrets cluster*
-- 3 nodes
-- Using raft to replicate data across nodes and persisting data on volume of each node
-- High availability
+## POCs
+- vault-transit-raft/README.md
 
 ## Reference
 - https://developer.hashicorp.com/vault/docs/secrets/transit

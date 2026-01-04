@@ -29,3 +29,7 @@ Thumbs.db
 .idea
 *.swp
 *.swo
+
+# Python
+.venv
+.ruff_cache

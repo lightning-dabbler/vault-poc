@@ -1,0 +1,26 @@
+[dependency-groups]
+# dev = []
+lint = [
+  "ruff==0.14.10"
+]
+
+[project]
+requires-python = ">=3.12"
+name = "vault-poc"
+version = "0.0.1"
+description = "vault poc"
+readme = "README.md"
+dependencies = [
+  "diagrams~=0.25"
+]
+classifiers = ["Private :: Do Not Upload"]
+
+[tool.ruff]
+# Extend the `ruff.toml` file in the parent directory...
+extend = "ruff.toml"
+
+[tool.uv]
+environments = [
+  "sys_platform == 'darwin'",
+  "sys_platform == 'linux'"
+]

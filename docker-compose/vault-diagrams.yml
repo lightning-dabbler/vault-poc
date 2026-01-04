@@ -1,0 +1,13 @@
+services:
+  vault-diagrams:
+    container_name: vault-diagrams
+    image: vault-poc-diagrams
+    volumes:
+      - .:/vault-poc
+    networks:
+      - vault-diagrams-network
+    stdin_open: true
+    tty: true
+
+networks:
+  vault-diagrams-network:
