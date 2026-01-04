@@ -22,7 +22,7 @@ listener "tcp" {
 }
 
 seal "transit" {
-   address            = "vault-transit-engine:8200"
+   address            = "vault-transit-secrets-engine:8200"
    disable_renewal    = "false"
 
    // Key configuration
