@@ -27,8 +27,14 @@ py-format: # use ruff to format and lint configured python files in project
 	uv run --group lint ruff format --config ruff.toml
 
 enter-diagrams: # spin up vault-diagrams docker container and shell into it
-	docker compose -p vault -f docker-compose/vault-diagrams.yml --project-directory . up -d
+	docker-compose -p vault -f docker-compose/vault-diagrams.yml --project-directory . up -d
 	docker exec -it vault-diagrams bash
 
 down-diagrams: # stop and kill vault-diagrams and vault-diagrams-network network
-	docker compose -p vault --project-directory . -f docker-compose/vault-diagrams.yml down
+	docker-compose -p vault --project-directory . -f docker-compose/vault-diagrams.yml down
+
+up: # Spin up vault-transit-raft docker containers
+	docker-compose -p vault-transit-raft --project-directory . -f docker-compose/vault-transit-raft.yml up -d
+
+down: # Spin down vault-transit-raft docker containers
+	docker-compose -p vault-transit-raft --project-directory . -f docker-compose/vault-transit-raft.yml down

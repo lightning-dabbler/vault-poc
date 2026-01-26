@@ -4,12 +4,12 @@ services:
     image: haproxy:3.2.10-alpine
     ports:
       - "8200:8200"
+      - "8404:8404"  # Stats page
     volumes:
       - ./vault-transit-raft/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     networks:
       - vault-transit-raft
     depends_on:
-      - vault-transit-secrets-engine
       - vault-raft-server-1
       - vault-raft-server-2
       - vault-raft-server-3
@@ -17,86 +17,108 @@ services:
   vault-transit-secrets-engine:
     container_name: vault-transit-secrets-engine
     image: vault-poc
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    pull_policy: build
     volumes:
       - ./vault-transit-raft/transit-secrets-engine/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/transit-secrets-engine/data/vault:/vault/vault
       - ./vault-transit-raft/transit-secrets-engine/data/output:/vault/output
       - ./vault-transit-raft/entrypoint/transit.sh:/vault/entrypoint/transit.sh
     ports:
-      - "8200:8200"
+      - "8201:8200"
     networks:
       - vault-transit-raft
     environment:
-      VAULT_ADDR: http://0.0.0.0:8200
+      VAULT_ADDR: http://127.0.0.1:8200
+    healthcheck: # Check that the server is unsealed and the root token file exists
+      test: ["CMD-SHELL", "vault status && test -f /vault/output/root-token.txt"]
+      interval: 10s
+      timeout: 5s # How long to wait for a single healthcheck command to complete
+      retries: 3
+      start_period: 20s # 10 second grace period after container starts before failures count against retries
+      start_interval: 5s # Failures do not count and healthcheck every 5 seconds until start_period
     entrypoint: ["/vault/entrypoint/transit.sh"]
 
   vault-raft-server-1:
     container_name: vault-raft-server-1
     image: vault-poc
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    pull_policy: build
     depends_on:
-      - vault-transit-secrets-engine
+      vault-transit-secrets-engine:
+        condition: service_healthy
     volumes:
       - ./vault-transit-raft/vault-1/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/vault-1/data/vault:/vault/vault
       - ./vault-transit-raft/transit-secrets-engine/data/output:/vault/external/transit-engine:ro
-      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+      - ./vault-transit-raft/entrypoint/node.sh:/vault/entrypoint/node.sh
     ports:
       - "8210:8200"
       - "8211:8201"
     networks:
       - vault-transit-raft
     environment:
-      VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 1
-      VAULT_TRANSIT_SERVER: vault-transit-secrets-engine:8200
-      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
-    entrypoint: ["/vault/entrypoint/cluster.sh"]
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/root-token.txt
+    entrypoint: ["/vault/entrypoint/node.sh"]
 
   vault-raft-server-2:
     container_name: vault-raft-server-2
     image: vault-poc
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    pull_policy: build
     depends_on:
-      - vault-transit-secrets-engine
-      - vault-raft-server-1
+      vault-transit-secrets-engine:
+        condition: service_healthy
+      vault-raft-server-1:
+        condition: service_started
     volumes:
       - ./vault-transit-raft/vault-2/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/vault-2/data/vault:/vault/vault
       - ./vault-transit-raft/transit-secrets-engine/data/output:/vault/external/transit-engine:ro
-      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+      - ./vault-transit-raft/entrypoint/node.sh:/vault/entrypoint/node.sh
     ports:
       - "8220:8200"
       - "8221:8201"
     networks:
       - vault-transit-raft
     environment:
-      VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 2
-      VAULT_TRANSIT_SERVER: vault-transit-secrets-engine:8200
-      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
-    entrypoint: ["/vault/entrypoint/cluster.sh"]
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/root-token.txt
+    entrypoint: ["/vault/entrypoint/node.sh"]
 
   vault-raft-server-3:
     container_name: vault-raft-server-3
     image: vault-poc
+    build:
+      context: .
+      dockerfile: docker/vault/Dockerfile
+    pull_policy: build
     depends_on:
-      - vault-transit-secrets-engine
-      - vault-raft-server-2
+      vault-transit-secrets-engine:
+        condition: service_healthy
+      vault-raft-server-1:
+        condition: service_started
     volumes:
       - ./vault-transit-raft/vault-3/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/vault-3/data/vault:/vault/vault
       - ./vault-transit-raft/transit-secrets-engine/data/output:/vault/external/transit-engine:ro
-      - ./vault-transit-raft/entrypoint/cluster.sh:/vault/entrypoint/cluster.sh
+      - ./vault-transit-raft/entrypoint/node.sh:/vault/entrypoint/node.sh
     ports:
       - "8230:8200"
       - "8231:8201"
     networks:
       - vault-transit-raft
     environment:
-      VAULT_ADDR: http://0.0.0.0:8200
       VAULT_SERVER_NUM: 3
-      VAULT_TRANSIT_SERVER: vault-transit-secrets-engine:8200
-      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/wrapping-token.txt
-    entrypoint: ["/vault/entrypoint/cluster.sh"]
+      VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/root-token.txt
+    entrypoint: ["/vault/entrypoint/node.sh"]
 
 networks:
   vault-transit-raft:

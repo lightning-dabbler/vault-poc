@@ -21,9 +21,9 @@ sleep 2
 # Check that vault server is not in an errored state. Sealed state (exit code 2) is fine
 # https://unix.stackexchange.com/questions/786103/in-bash-how-to-capture-stdout-and-the-exit-code-of-a-command-when-the-e-flag-i
 vault_status=-1
-OUTPUT="$(vault status)" || exit_code=$?
+OUTPUT="$(vault status)" || vault_status=$?
 
-if [[ $vault_status -eq 1]]; then
+if [[ $vault_status -eq 1 ]]; then
     echo "Vault server is in an errored state"
     exit 1
 fi
@@ -104,8 +104,8 @@ EOF
 
 # Create token for vault servers to use
 vault token create -policy="autounseal" \
-   -wrap-ttl=300 -period=24h \
-   -field=wrapping_token > /vault/output/wrapping-token.txt
+   -period=24h \
+   -field=token > /vault/output/root-token.txt
 
 # Keep alive
 wait $VAULT_PID
