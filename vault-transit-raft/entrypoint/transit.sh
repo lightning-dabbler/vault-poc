@@ -107,5 +107,7 @@ vault token create -policy="autounseal" \
    -period=24h \
    -field=token > /vault/output/root-token.txt
 
+unset VAULT_TOKEN
+
 # Keep alive
 wait $VAULT_PID
