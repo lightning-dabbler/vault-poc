@@ -1,27 +1,25 @@
-# Vault transit with raft storage
+# Vault cluster with auto unseal
+Vault cluster leveraging Raft for distributed storage and Transit engine for automated unsealing.
 
-## Resources
-### vault transit secret engine
-- 1 node
-- Stores no data
-- Storage layer is file system
-- Acts as a cryptography engine for the vault secrets cluster
-- Used to auto unseal vault nodes
+## Architecture
 
-### vault secrets cluster
-- 3 nodes
-- Using raft to replicate data across nodes (from leader to standby nodes) and persisting data on volume of each node
-- High availability
+### Components
+- **Vault Secrets Cluster**: 3 nodes with Raft storage
+- **Vault Transit Secrets Engine**: 1 node for auto-unsealing
+- **HAProxy**: Load balancer (http://localhost:8200)
 
-### haproxy
-- Load balancer for vault cluster
+### Features
+- Automatic unsealing via Transit engine
+- Raft consensus for HA
+- Active/standby failover
 
-## Design diagram
+## Architechure diagram
 
+### Diagram
 ![Architectural diagram](../diagrams/assets/vault_transit_secrets_engine_architecture.png)
 
 ### Generating diagram
-In docker environment:
+In docker environment from root:
 ```console
 $ uv run diagrams/scripts/vault-transit-raft.py
 ```

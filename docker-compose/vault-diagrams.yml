@@ -2,6 +2,7 @@ services:
   vault-diagrams:
     container_name: vault-diagrams
     image: vault-poc-diagrams
+    pull_policy: build
     volumes:
       - .:/vault-poc
     networks:
