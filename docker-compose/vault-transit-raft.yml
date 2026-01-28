@@ -10,9 +10,12 @@ services:
     networks:
       - vault-transit-raft
     depends_on:
-      - vault-raft-server-1
-      - vault-raft-server-2
-      - vault-raft-server-3
+      vault-raft-server-1:
+        condition: service_healthy
+      vault-raft-server-2:
+        condition: service_started
+      vault-raft-server-3:
+        condition: service_started
 
   vault-transit-secrets-engine:
     container_name: vault-transit-secrets-engine
@@ -34,11 +37,11 @@ services:
       VAULT_ADDR: http://127.0.0.1:8200
     healthcheck: # Check that the server is unsealed and the root token file exists
       test: ["CMD-SHELL", "vault status && test -f /vault/output/root-token.txt"]
-      interval: 10s
+      interval: 5s # Time between each check
       timeout: 5s # How long to wait for a single healthcheck command to complete
       retries: 3
-      start_period: 20s # 10 second grace period after container starts before failures count against retries
-      start_interval: 5s # Failures do not count and healthcheck every 5 seconds until start_period
+      start_period: 5s # 5 second grace period after container starts before failures count against retries
+      start_interval: 3s # Failures do not count and healthcheck every 3 seconds until start_period
     entrypoint: ["/vault/entrypoint/transit.sh"]
 
   vault-raft-server-1:
@@ -64,6 +67,13 @@ services:
     environment:
       VAULT_SERVER_NUM: 1
       VAULT_UNSEAL_TOKEN_PATH: /vault/external/transit-engine/root-token.txt
+    healthcheck: # Check that the server is unsealed
+      test: ["CMD-SHELL", "VAULT_ADDR=http://127.0.0.1:8200 vault status"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+      start_interval: 3s
     entrypoint: ["/vault/entrypoint/node.sh"]
 
   vault-raft-server-2:
@@ -77,7 +87,7 @@ services:
       vault-transit-secrets-engine:
         condition: service_healthy
       vault-raft-server-1:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./vault-transit-raft/vault-2/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/vault-2/data/vault:/vault/vault
@@ -104,7 +114,7 @@ services:
       vault-transit-secrets-engine:
         condition: service_healthy
       vault-raft-server-1:
-        condition: service_started
+        condition: service_healthy
     volumes:
       - ./vault-transit-raft/vault-3/vault.hcl:/vault/config/vault.hcl
       - ./vault-transit-raft/vault-3/data/vault:/vault/vault

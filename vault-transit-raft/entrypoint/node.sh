@@ -14,9 +14,8 @@ VAULT_TRANSIT_TOKEN=`cat $VAULT_UNSEAL_TOKEN_PATH`
 
 export VAULT_TOKEN="$VAULT_TRANSIT_TOKEN"
 
-# create path for vault raft storage, vault server output, and vault server logs
-mkdir -p /vault/vault/data /vault/vault/output /vault/vault/logs
-
+# create path for vault raft storage
+mkdir -p /vault/vault/data
 
 export VAULT_ADDR="http://127.0.0.1:8200"
 
@@ -35,16 +34,17 @@ if [[ $vault_status -eq 1 ]]; then
     exit 1
 fi
 
-# Create recovery file if it doesn't exist and vault node is leader node
+# Create recovery file if it doesn't exist and vault-1 is the initial leader node
 if [ ! -f "$RECOVERY_FILE" ] && [ "$VAULT_SERVER_NUM" = "1" ]; then
-    echo "Initializing ${VAULT_SERVER}"
-    mkdir -p "$(dirname "$RECOVERY_FILE")"
-    echo "recovery shares: $RECOVERY_SHARES, recovery threshold: $RECOVERY_THRESHOLD"
-    # https://developer.hashicorp.com/vault/docs/commands/operator/init
-    vault operator init -format=json -recovery-shares=$RECOVERY_SHARES -recovery-threshold=$RECOVERY_THRESHOLD > "$RECOVERY_FILE"
-    # only current user should access file (vault user)
-    chmod 600 "$RECOVERY_FILE"
+        echo "Initializing ${VAULT_SERVER}"
+        mkdir -p "$(dirname "$RECOVERY_FILE")"
+        echo "recovery shares: $RECOVERY_SHARES, recovery threshold: $RECOVERY_THRESHOLD"
+        # https://developer.hashicorp.com/vault/docs/commands/operator/init
+        vault operator init -format=json -recovery-shares=$RECOVERY_SHARES -recovery-threshold=$RECOVERY_THRESHOLD > "$RECOVERY_FILE"
+        # only current user should access file (vault user)
+        chmod 600 "$RECOVERY_FILE"
 fi
 
+unset VAULT_TOKEN
 # Keep alive
 wait $VAULT_PID

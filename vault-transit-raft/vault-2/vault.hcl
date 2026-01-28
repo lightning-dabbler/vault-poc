@@ -1,6 +1,6 @@
 disable_mlock = true
-cluster_addr = "http://127.0.0.1:8201"
-api_addr = "http://127.0.0.1:8200"
+cluster_addr = "http://vault-raft-server-2:8201"
+api_addr = "http://vault-raft-server-2:8200"
 ui = true
 
 storage "raft" {
