@@ -36,13 +36,13 @@ fi
 
 # Create recovery file if it doesn't exist and vault-1 is the initial leader node
 if [ ! -f "$RECOVERY_FILE" ] && [ "$VAULT_SERVER_NUM" = "1" ]; then
-        echo "Initializing ${VAULT_SERVER}"
-        mkdir -p "$(dirname "$RECOVERY_FILE")"
-        echo "recovery shares: $RECOVERY_SHARES, recovery threshold: $RECOVERY_THRESHOLD"
-        # https://developer.hashicorp.com/vault/docs/commands/operator/init
-        vault operator init -format=json -recovery-shares=$RECOVERY_SHARES -recovery-threshold=$RECOVERY_THRESHOLD > "$RECOVERY_FILE"
-        # only current user should access file (vault user)
-        chmod 600 "$RECOVERY_FILE"
+    echo "Initializing ${VAULT_SERVER}"
+    mkdir -p "$(dirname "$RECOVERY_FILE")"
+    echo "recovery shares: $RECOVERY_SHARES, recovery threshold: $RECOVERY_THRESHOLD"
+    # https://developer.hashicorp.com/vault/docs/commands/operator/init
+    vault operator init -format=json -recovery-shares=$RECOVERY_SHARES -recovery-threshold=$RECOVERY_THRESHOLD > "$RECOVERY_FILE"
+    # only current user should access file (vault user)
+    chmod 600 "$RECOVERY_FILE"
 fi
 
 unset VAULT_TOKEN
