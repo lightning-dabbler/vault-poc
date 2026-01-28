@@ -2,6 +2,11 @@ services:
   vault-diagrams:
     container_name: vault-diagrams
     image: vault-poc-diagrams
+    build:
+      context: .
+      dockerfile: docker/diagrams/Dockerfile
+      args:
+        UV_VERSION: 0.9.12
     pull_policy: build
     volumes:
       - .:/vault-poc
