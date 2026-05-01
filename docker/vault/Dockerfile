@@ -1,8 +1,7 @@
-FROM hashicorp/vault:1.20.4
+FROM hashicorp/vault:2.0.0
+
+USER root
 RUN apk add curl make bash jq
-RUN curl -o wait-for-it https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
-RUN chmod +x wait-for-it
-RUN mv wait-for-it /usr/local/bin/wait-for-it
 # Set a custom PS1
 ENV PS1='\[\e[1;32m\]\u@\h:\w\$ \[\e[0m\]'
 
